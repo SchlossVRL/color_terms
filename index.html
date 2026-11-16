@@ -512,7 +512,7 @@
                 type: jsPsychHtmlButtonResponse,
                 stimulus: `
             <div class="break-screen">
-                <h2>Block ${blockNum} of 5</h2>
+                <p>Block ${blockNum} of 5</p>
                 <p>For the following trials, you will be asked to rate how much you associate each color with the concept:</p>
                 <h2>${concept}</h2>
                 <p>Please click 'Continue' when you are ready to begin.</p>
@@ -530,9 +530,9 @@
                 type: jsPsychHtmlButtonResponse,
                 stimulus: `
             <div class="break-screen">
-                <h2>Block ${blockNum} of 5 completed!</h2>
-                <p>Take a short break if you need one.</p>
-                <p>Click Continue when you are ready to proceed.</p>
+                <p>You have completed block <bold>${blockNum} of 5. </bold></p>
+                <p>Please take a short break if you need one.</p>
+                <p>Please click 'Continue' when you are ready to proceed.</p>
             </div>
         `,
                 choices: ['Continue']
@@ -569,8 +569,8 @@
                 stimulus: `
                     <div class="break-screen">
                         <p>You have completed block ${blockNum} of 5.</p>
-                        <p>Take a short break if you need one.</p>
-                        <p>Click Continue when you are ready for the next block.</p>
+                        <p>Please take a short break if you need one.</p>
+                        <p>Please click 'Continue' when you are ready for the next block.</p>
                     </div>
                 `,
                 choices: ['Continue']
@@ -618,9 +618,11 @@
                 randomize_order: false
             });
 
-            // Add a break after EVERY block, including the final block.
-            timeline.push(breakScreen(b + 1));
+            // Add a break after blocks 1–4, but not after the final block.
 
+            if (b < shuffled_concepts.length - 1) {
+                timeline.push(breakScreen(b + 1));
+            }
         }
 
         // --------------------------------------------------
