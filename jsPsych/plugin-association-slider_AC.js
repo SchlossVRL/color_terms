@@ -42,12 +42,12 @@ var jsPsychAssociationSlider = (function (jspsych) {
 
       left_label: {
         type: jspsych.ParameterType.STRING,
-        default: "Not at all",
+        default: "not at all",
       },
 
       right_label: {
         type: jspsych.ParameterType.STRING,
-        default: "Very much",
+        default: "very much",
       },
     },
 
@@ -270,13 +270,20 @@ var jsPsychAssociationSlider = (function (jspsych) {
         document.removeEventListener("click", finishHandler);
 
         // Record response.
+
         const response = Number(slider.value);
+
+        // Clear the screen.
 
         display_element.innerHTML = "";
 
-        this.jsPsych.finishTrial({
-          response: response,
-        });
+        // Wait 500 ms before advancing to the next trial.
+
+        setTimeout(() => {
+          this.jsPsych.finishTrial({
+            response: response,
+          });
+        }, 500);
       };
 
       // Track mouse movement across the document.

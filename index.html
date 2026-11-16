@@ -8,6 +8,8 @@
     <script src="jsPsych/jspsych.js"></script>
     <script src="jsPsych/plugin-html-button-response.js"></script>
     <script src="jsPsych/plugin-html-keyboard-response.js"></script>
+    <script src="jsPsych/plugin-survey-text.js"></script>
+    <script src="jsPsych/plugin-survey-multi-select.js"></script>
     <script src="jsPsych/plugin-association-slider_AC.js"></script>
     <script src="jsPsych/plugin-fullscreen.js"></script>
 
@@ -20,6 +22,53 @@
     <link href="jsPsych/jspsych.css" rel="stylesheet" type="text/css">
 
     <style>
+        #demo-association-slider::-webkit-slider-runnable-track {
+
+            height: 1px;
+
+            background: black;
+
+        }
+
+        #demo-association-slider::-moz-range-track {
+
+            height: 1px;
+
+            background: black;
+
+        }
+
+        #demo-association-slider::-webkit-slider-thumb {
+
+            appearance: none;
+
+            -webkit-appearance: none;
+
+            width: 1px;
+
+            height: 30px;
+
+            background: black;
+
+            border: none;
+
+            margin-top: -13px;
+
+        }
+
+        #demo-association-slider::-moz-range-thumb {
+
+            width: 1px;
+
+            height: 30px;
+
+            background: black;
+
+            border: none;
+
+            border-radius: 0;
+
+        }
     </style>
 
 </head>
@@ -181,35 +230,16 @@
         // WELCOME SCREEN
         // --------------------------------------------------
 
-        const welcome_screen = {
+        // Initial welcome screen
+        var initial_screen = {
             type: jsPsychHtmlButtonResponse,
-
-            stimulus: `
-                <div style="width:800px; margin:auto;">
-                    <h2>Welcome to our experiment!</h2>
-
-                    <p>
-                        In this experiment, you will make judgments about
-                        how strongly individual colors are associated with
-                        different concepts.
-                    </p>
-
-                    <p>
-                        The experiment consists of five blocks.
-                        Each block contains a series of colors paired
-                        with a concept.
-                    </p>
-
-                    <p>
-                        Please complete the experiment in one sitting.
-                    </p>
-                </div>
-            `,
-
+            stimulus: 'Welcome to our experiment!' +
+                '<p>At the bottom of this screen, you will see a button that says "Begin Experiment".' +
+                '<br>Please only click that button when you are ready to complete the 30 minute experiment in one sitting.</p>' +
+                '<p> Once you click that button, it will not be possible to restart the experiment.',
             choices: ['Begin Experiment']
-        };
-
-        timeline.push(welcome_screen);
+        }
+        timeline.push(initial_screen);
 
         // --------------------------------------------------
         // FULLSCREEN
@@ -220,58 +250,280 @@
             fullscreen_mode: true
         });
 
+
+        //--------------------------------------------------
+        // CONSENT
+        //--------------------------------------------------
+        var consentSign = {
+            type: jsPsychSurveyMultiSelect,
+            questions: [
+                {
+                    prompt:
+                        "  <strong>UNIVERSITY OF WISCONSIN-MADISON</strong>" +
+                        "  <br><strong>Research Participant Information and Consent Form</strong>" +
+                        " <br><br><strong>Title of the Study:</strong> Investigating how observers perceive, interpret, and evaluate visual features in 2D scenes and 3D environments" +
+                        " <br><br><strong>Principal Investigator:</strong> Karen B. Schloss (phone: 608-316-4495) (email: kschloss@wisc.edu)" +
+                        "  <br><br><strong><u>DESCRIPTION OF THE RESEARCH</u></strong>" +
+                        "  <br>You are invited to participate in a research study about how visual features influence the ability to perceive, interpret, navigate, and remember information in visual displays" +
+                        "  <br><br>You have been asked to participate because you saw a description of the study and signed up to be a participant." +
+                        "  <br><br>The purpose of the research is to understand principles by which people perceive, evaluate and interpret visual information (e.g., the meaning of parts of a scientific diagram)." +
+                        "  <br><br>This study will include adults from UW-Madison and nearby areas who volunteer to participate." +
+                        "  <br><br>The research will be conducted online, with no requirement to appear in person." +
+                        "  <br><br><strong><u>WHAT WILL MY PARTICIPATION INVOLVE?</u></strong>" +
+                        "  <br>If you decide to participate in this research you will be presented with visual displays containing images and/or text and will be asked to make judgments about them. For example, you may see shapes and be asked how round they appear or view a graph with a legend and interpret information about the data in the graph." +
+                        "  <br><br>You will be asked to respond by making button presses on a keyboard/mouse. You may be asked to complete questionnaires about your expertise or educational level in a given domain (e.g., neuroscience) and questionnaires about what sorts of things you like/dislike. Finally, you may be asked to respond to questions about your experience during the experiment (e.g., how much you enjoyed the task)." +
+                        "  <br><br>You will be asked to complete 2-6 surveys or tasks." +
+                        "  <br><br>Your participation will last approximately 30-60 minutes per session (as specified when you signed up to participate) and will require 1 session (30 to 60 min total)." +
+                        "  <br><br><strong><u>ARE THERE ANY RISKS TO ME?</u></strong>" +
+                        "  <br>We don't anticipate any risks to you from participating in this study." +
+                        "  <br><br><strong><u>ARE THERE ANY BENEFITS TO ME?</u></strong>" +
+                        "  <br>There are no direct benefits for participating in this study." +
+                        "  <br><br><strong><u>WILL I BE COMPENSATED FOR MY PARTICIPATION?</u></strong>" +
+                        "  <br>Consistent with PSY 202/210/225 policies, you will receive 1 extra credit point/30 minutes of study participation. At the end of the semester, those extra credit points are converted such that 1 point of extra credit = 0.33% added directly to your grade at the end of term. Consult your class syllabus for additional details regarding the application of extra credit points to your final grade." +
+                        "  <br><br><strong><u>HOW WILL MY CONFIDENTIALITY BE PROTECTED?</u></strong>" +
+                        "  <br>While there will probably be publications as a result of this study, your name will not be used. Typically, group characteristics will be published, but datasets with individual responses may also be shared. In such cases, the data will not be linked to your name or other identifiable information." +
+                        "  <br><br><strong><u>WHOM SHOULD I CONTACT IF I HAVE QUESTIONS?</u></strong>" +
+                        "  <br>You may ask any questions about the research at any time. If you have questions about the research you can contact the Principal Investigator Karen B. Schloss at 608-316-4495." +
+                        "  <br><br>If you are not satisfied with response of research team, have more questions, or want to talk with someone about your rights as a research participant, you should contact the Education and Social/Behavioral Science IRB Office at 608-263-2320." +
+                        "  <br><br>Your participation is completely voluntary. If you decide not to participate or to withdraw from the study you may do so without penalty." +
+                        "  <br><br>By clicking the box below, you confirm that you have read this consent form, had an opportunity to ask any questions about your participation in this research and voluntarily consent to participate. You may print a copy of this form for your records." +
+                        "  <br><br>Please click the box below next to the text 'I consent' to give your informed consent to participate. " +
+                        "   </p>",
+                    options: ["<strong>I consent</strong>"],
+                    horizontal: false,
+                    required: true,
+                    name: 'Consent'
+                },
+            ],
+            button_label: "Start Experiment",
+        };
+
+        timeline.push(consentSign);
+
+        //--------------------------------------------------
+        // OVERVIEW
+        //--------------------------------------------------
+        // Overview instructions of experiment
+        var overview_instructions = {
+            type: jsPsychHtmlButtonResponse,
+            stimulus: 'Welcome! <p> This experiment involves two parts: demographic information, followed by the experimental task.' +
+                '<p> It will take about 30 minutes to complete both parts.',
+            choices: ['Continue']
+        }
+        timeline.push(overview_instructions);
+
+        //--------------------------------------------------
+        // DEMOGRAPHIC INFORMATION
+        //--------------------------------------------------
+        var age_lang_demo = {
+            type: jsPsychSurveyText,
+            questions: [
+                { prompt: "Age", name: 'Age', rows: "1", columns: "3", required: true, },
+                { prompt: "Gender", name: 'Gender', rows: "1", columns: "15", required: true, },
+                { prompt: "Race/ethnicity", name: 'Race/ethnicity', rows: "1", columns: "30", required: true, },
+                { prompt: "List all languages you know", name: "Languages", rows: "6", columns: "60", required: true, }
+            ],
+            preamble: "Please answer the following questions.",
+            button_label: "Done",
+            randomize_question_order: false
+        }
+        timeline.push(age_lang_demo);
+
         // --------------------------------------------------
         // INSTRUCTIONS
         // --------------------------------------------------
 
+        // Sort colors by their original index
+        const orderedColors = [...colors].sort((a, b) =>
+            a.color_index - b.color_index
+        );
+
         const instructions = {
-
             type: jsPsychHtmlButtonResponse,
-
             stimulus: `
-                <div style="width:800px; margin:auto; text-align:left;">
+        <div style="width:100%; padding-bottom:30px;">
 
-                    <h2 style="text-align:center;">Instructions</h2>
+            <div style="
+                text-align:left;
+                font-size:18px;
+                line-height:25px;
+                width:1200px;
+            ">
+                During this experiment you will be presented with a series of concepts, one at a time, from the set below:
+            </div>
 
-                    <p>
-                        In this experiment, you will see a concept word
-                        paired with a colored square.
-                    </p>
+            <div style="
+                text-align:left;
+                width:1200px;
+            ">
 
-                    <p>
-                        Your task is to indicate how strongly you associate
-                        the color with the concept.
-                    </p>
+                <p style="
+                    font-size:18px;
+                    line-height:20px;
+                    text-align:center;
+                    font-weight:bold;
+                ">
+                    ${assigned_concepts.join(", ")}
+                </p>
+            </div>
 
-                    <p>
-                        Use the slider to indicate your response.
-                        The left end represents "Not at all," while the
-                        right end represents "Very much."
-                    </p>
+            <div style="
+                text-align:left;
+                font-size:18px;
+                line-height:25px;
+                width:1200px;
+            ">
+                For each concept, you will be asked to rate how much you associate it with each of the colors below on a scale from 'not at all' to 'very much'. <br>
+            </div>
 
-                    <p>
-                        Move your mouse along the slider to adjust your
-                        response. Click on the slider when you are ready
-                        to submit your answer.
-                    </p>
+            <div style="
+                display:flex;
+                justify-content:center;
+                width:90%;
+            ">
+                <div style="
+                    width:1000px;
+                    display:grid;
+                    grid-template-columns:repeat(13, 1fr);
+                    gap:5px;
+                    padding:5px;
+                    margin:0 auto;
+                ">
 
-                    <p>
-                        You will complete five blocks, one for each concept.
-                        Each block contains all 71 colors.
-                    </p>
-
-                    <p>
-                        You will be able to take a short break between blocks.
-                    </p>
-
-                    <p>
-                        Click Continue when you are ready to begin.
-                    </p>
-
+                    ${orderedColors.map(color => `
+                        <div style="
+                            width:100%;
+                            aspect-ratio:1;
+                            background-color:${color.color_hex};
+                        "></div>
+                    `).join('')}
                 </div>
-            `,
+            </div>
+            <br>
+            <div style="
+                text-align:left;
+                font-size:18px;
+                line-height:25px;
+                width:1200px;
+            ">
+                Each trial will include one concept word and one color.
+                You will be asked to make your rating by sliding the cursor along a slider response scale.
 
-            choices: ['Continue']
+    <div style="text-align:center; margin:20px auto;">
+    <input
+        type="range"
+        id="demo-association-slider"
+        min="-200"
+        max="200"
+        step="1"
+        value="0"
+        style="
+            width:500px;
+            max-width:85vw;
+            height:30px;
+            margin:0 auto;
+            display:block;
+            appearance:none;
+            -webkit-appearance:none;
+            background:transparent;
+            cursor:pointer;
+            "
+        >
+
+    <div style="
+        width:500px;
+        max-width:85vw;
+        margin:-17px auto 0 auto;
+        height:4px;
+        position:relative;
+        pointer-events:none;
+        ">
+
+        <span style="
+            position:absolute;
+            left:0;
+            top:-10px;
+            height:30px;
+            width:1px;
+            background:black;
+        "></span>
+
+        <span style="
+            position:absolute;
+            left:50%;
+            top:-6px;
+            height:16px;
+            width:1px;
+            background:black;
+        "></span>
+        
+        <span style="
+            position:absolute;
+            right:0;
+            top:-10px;
+            height:30px;
+            width:1px;
+            background:black;
+            "></span>
+        </div>
+
+        <div style="
+            width:500px;
+            max-width:85vw;
+            margin:0 auto;
+            position:relative;
+            font-size:16px;
+                height:25px;
+            ">
+            <span style="
+                position:absolute;
+                left:0;
+                top:15px;
+                transform:translateX(-50%);
+                white-space:nowrap;
+            ">
+                Not at all
+            </span>
+                <span style="
+                    position:absolute;
+                    right:0;
+                    top:15px;
+                    transform:translateX(50%);
+                    white-space:nowrap;
+                ">
+                    Very much
+                </span>
+            </div>
+        </div>
+                Before beginning, please look at the list of concepts and colors.
+                For each concept, think about the color you associate least with it.
+                When you see that color paired with that concept, please click on the left endpoint of the scale near 'not at all'.
+                <br><br>
+                Now, please think about the color you associate most with it.
+                When you see that color paired with that concept, please click on the right endpoint of the scale near 'very much'.
+                <br><br>
+                Please use the full range of the scale. That is, if you believe a concept is somewhat associated with a color, you would click somewhere toward the middle of the scale.
+                You will be asked to rate each color for a given concept before moving on to the next.
+                <br><br>
+                Press 'Continue' to begin the experiment.
+            </div>
+        </div>
+    `,
+            choices: ["Continue"],
+            on_load: function () {
+                const slider = document.getElementById("demo-association-slider");
+                demoMouseHandler = function (event) {
+                    const rect = slider.getBoundingClientRect();
+                    let x = event.clientX - rect.left;
+                    x = Math.max(0, Math.min(x, rect.width));
+                    const percent = x / rect.width;
+                    slider.value = Math.round(-200 + percent * 400);
+                };
+                document.addEventListener("mousemove", demoMouseHandler);
+            },
+            on_finish: function () {
+                document.removeEventListener("mousemove", demoMouseHandler);
+            }
         };
 
         timeline.push(instructions);
@@ -293,6 +545,8 @@
                 color_hex: jsPsych.timelineVariable('color_hex')
             }
         };
+
+        // 500 ms ITI is built into custom plugin, so no need to add a separate ITI trial. (Can adjust at bottom of pluggin script in the finish handler)
 
         // --------------------------------------------------
         // BREAK SCREEN
