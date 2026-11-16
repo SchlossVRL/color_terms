@@ -279,29 +279,17 @@
         // --------------------------------------------------
 
         const association_trial = {
-
             type: jsPsychAssociationSlider,
-
             concept: jsPsych.timelineVariable('concept'),
-
             color_hex: jsPsych.timelineVariable('color_hex'),
-
             data: {
-
                 concept: jsPsych.timelineVariable('concept'),
-
                 block: jsPsych.timelineVariable('block'),
-
                 block_order: jsPsych.timelineVariable('block_order'),
-
                 v_index: jsPsych.timelineVariable('v_index'),
-
                 color_index: jsPsych.timelineVariable('color_index'),
-
                 color_hex: jsPsych.timelineVariable('color_hex')
-
             }
-
         };
 
         // --------------------------------------------------
@@ -309,27 +297,19 @@
         // --------------------------------------------------
 
         function breakScreen(blockNum) {
-
             return {
-
                 type: jsPsychHtmlButtonResponse,
-
                 stimulus: `
                     <div class="break-screen">
-
                         <p>You have completed block ${blockNum} of 5.</p>
-
                         <p>
                             Take a short break if you need one.
                         </p>
-
                         <p>
                             Click Continue when you are ready for the next block.
                         </p>
-
                     </div>
                 `,
-
                 choices: ['Continue']
             };
         }
@@ -355,41 +335,26 @@
             const block_trials = shuffled_colors.map((color) => {
 
                 return {
-
                     concept: concept,
-
                     block: b + 1,
-
                     block_order: b + 1,
-
                     v_index: color.v_index,
-
                     color_index: color.color_index,
-
                     color_hex: color.color_hex
-
                 };
-
             });
 
             // Add the trials for this concept block.
             timeline.push({
-
                 timeline: [association_trial],
-
                 timeline_variables: block_trials,
-
                 randomize_order: false
-
             });
 
             // Add a break after blocks 1–4.
             if (b < shuffled_concepts.length - 1) {
-
                 timeline.push(breakScreen(b + 1));
-
             }
-
         }
 
         // --------------------------------------------------
@@ -397,11 +362,8 @@
         // --------------------------------------------------
 
         timeline.push({
-
             type: jsPsychFullscreen,
-
             fullscreen_mode: false
-
         });
 
         // --------------------------------------------------
@@ -409,19 +371,12 @@
         // --------------------------------------------------
 
         const save_data = {
-
             type: jsPsychPipe,
-
             action: "save",
-
             experiment_id: experiment_id,
-
             filename: filename,
-
             wait_message: "Please wait while your data are being saved.",
-
             data_string: () => jsPsych.data.get().csv()
-
         };
 
         timeline.push(save_data);
