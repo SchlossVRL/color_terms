@@ -125,7 +125,7 @@ var jsPsychAssociationSlider = (function (jspsych) {
                     <span style="
                         position:absolute;
                         left:0;
-                        top:-10px;
+                        top:-12px;
                         height:30px;
                         width:1px;
                         background:black;
@@ -145,7 +145,7 @@ var jsPsychAssociationSlider = (function (jspsych) {
                     <span style="
                         position:absolute;
                         right:0;
-                        top:-10px;
+                        top:-12px;
                         height:30px;
                         width:1px;
                         background:black;
