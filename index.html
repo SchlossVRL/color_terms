@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Color-Concept Association Experiment</title>
+
+    <!-- jsPsych -->
+    <script src="jsPsych/jspsych.js"></script>
+    <script src="jsPsych/plugin-html-button-response.js"></script>
+    <script src="jsPsych/plugin-html-keyboard-response.js"></script>
+    <script src="jsPsych/plugin-html-slider-response.js"></script>
+    <script src="jsPsych/plugin-fullscreen.js"></script>
+
+    <!-- Experiment conditions -->
+    <script src="exp0_conditions.js"></script>
+
+    <!-- jsPsychPipe -->
+    <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe"></script>
+
+    <link href="jsPsych/jspsych.css" rel="stylesheet" type="text/css">
+
+    <style>
+        body {
+            background-color: rgb(128, 128, 128);
+            font-family: Arial, sans-serif;
+        }
+
+        /* Main trial display */
+        .trial-container {
+            text-align: center;
+            width: 100%;
+        }
+
+        .concept-word {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+
+        .color-square {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 45px auto;
+        }
+
+        /* Slider */
+        #jspsych-html-slider-response-response {
+            width: 500px;
+            max-width: 85vw;
+            height: 30px;
+            margin: 0 auto;
+            appearance: none;
+            -webkit-appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        /* Slider track */
+        #jspsych-html-slider-response-response::-webkit-slider-runnable-track {
+            height: 4px;
+            background: black;
+        }
+
+        #jspsych-html-slider-response-response::-moz-range-track {
+            height: 4px;
+            background: black;
+        }
+
+        /* Slider thumb */
+        #jspsych-html-slider-response-response::-webkit-slider-thumb {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 1px;
+            height: 30px;
+            background: black;
+            border: none;
+            margin-top: -13px;
+        }
+
+        #jspsych-html-slider-response-response::-moz-range-thumb {
+            width: 1px;
+            height: 30px;
+            background: black;
+            border: none;
+            border-radius: 0;
+        }
+
+        /* Slider labels */
+        .jspsych-html-slider-response-container {
+            width: 500px;
+            max-width: 85vw;
+            margin: 0 auto;
+        }
+
+        .jspsych-html-slider-response-label {
+            font-size: 16px;
+        }
+
+        /* Break screens */
+        .break-screen {
+            text-align: center;
+            font-size: 22px;
+        }
+    </style>
+
+</head>
+
+<body></body>
+
+<script>
+
+    async function startExperiment() {
+
+        // --------------------------------------------------
+        // INITIALIZE JPSYCH
+        // --------------------------------------------------
+
+        var filename;
+        var jsPsych = initJsPsych({
+            on_finish: function () {
+                jsPsych.data.get().localSave('csv', filename);
+            }
+        });
+
+        const sona_id = jsPsych.data.getURLVariable('id');
+
+        var participant_id = jsPsych.randomization.randomID(10);
+        filename = `${participant_id}.csv`;
+
+        // --------------------------------------------------
+        // EXPERIMENT SETTINGS
+        // --------------------------------------------------
+
+        // IMPORTANT: Replace this with your new jsPsychPipe experiment ID.
+        const experiment_id = "YOUR_EXPERIMENT_ID";
+
+        //const condition_num = await jsPsychPipe.getCondition(experiment_id);
+
+        const condition_num = 0;
+
+        // Make sure the returned condition is valid.
+        const assigned_condition = Number(condition_num);
+
+        if (!concept_conds[assigned_condition]) {
+            alert("Error: Invalid experimental condition.");
+            return;
+        }
+
+        // Get the five concepts assigned to this participant.
+        const assigned_concepts = concept_conds[assigned_condition];
+
+        console.log("Condition:", assigned_condition);
+        console.log("Assigned concepts:", assigned_concepts);
+
+        // Add participant information to every trial.
+        jsPsych.data.addProperties({
+            participant_id: participant_id,
+            sona_id: sona_id,
+            condition_num: assigned_condition
+        });
+
+        // --------------------------------------------------
+        // TIMELINE
+        // --------------------------------------------------
+
+        let timeline = [];
+
+        // Set background color.
+        document.body.style.backgroundColor = "rgb(128,128,128)";
+
+        // --------------------------------------------------
+        // SHUFFLE FUNCTION
+        // --------------------------------------------------
+
+        function shuffleArray(array) {
+
+            let arr = array.slice();
+
+            for (let i = arr.length - 1; i > 0; i--) {
+
+                const j = Math.floor(Math.random() * (i + 1));
+
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+
+            return arr;
+        }
+
+        // --------------------------------------------------
+        // LOAD COLOR DATA
+        // --------------------------------------------------
+
+        let colors = [];
+
+        try {
+
+            const response = await fetch('UW71coordinates_long.csv');
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const csvText = await response.text();
+
+            const lines = csvText.trim().split(/\r?\n/);
+
+            const headers = lines[0].replace(/^\uFEFF/, '').split(',');
+
+            const vIndexColumn = headers.indexOf('v_index');
+            const colorIndexColumn = headers.indexOf('color_index');
+            const colorHexColumn = headers.indexOf('color_hex');
+
+            if (vIndexColumn === -1 || colorIndexColumn === -1 || colorHexColumn === -1) {
+                throw new Error("Required columns (v_index, color_index, color_hex) were not found.");
+            }
+
+            for (let i = 1; i < lines.length; i++) {
+
+                if (lines[i].trim() === "") {
+                    continue;
+                }
+
+                const cols = lines[i].split(',');
+
+                const v_index = cols[vIndexColumn].trim();
+                const color_index = Number(cols[colorIndexColumn].trim());
+                const color_hex = cols[colorHexColumn].trim();
+
+                if (v_index && !Number.isNaN(color_index) && color_hex.startsWith('#')) {
+
+                    colors.push({
+                        v_index: v_index,
+                        color_index: color_index,
+                        color_hex: color_hex
+                    });
+                }
+            }
+
+            console.log("Loaded colors:", colors);
+            console.log("Total colors:", colors.length);
+
+            if (colors.length !== 71) {
+                throw new Error(`Expected 71 colors, but found ${colors.length}.`);
+            }
+
+        } catch (error) {
+
+            console.error("Error loading color data:", error);
+
+            alert(
+                "Failed to load color data.\n\n" +
+                error.message +
+                "\n\nPlease check that UW71coordinates_long.csv is in the correct location."
+            );
+
+            return;
+        }
+
+        // --------------------------------------------------
+        // WELCOME SCREEN
+        // --------------------------------------------------
+
+        const welcome_screen = {
+            type: jsPsychHtmlButtonResponse,
+
+            stimulus: `
+                <div style="width:800px; margin:auto;">
+                    <h2>Welcome to our experiment!</h2>
+
+                    <p>
+                        In this experiment, you will make judgments about
+                        how strongly individual colors are associated with
+                        different concepts.
+                    </p>
+
+                    <p>
+                        The experiment consists of five blocks.
+                        Each block contains a series of colors paired
+                        with a concept.
+                    </p>
+
+                    <p>
+                        Please complete the experiment in one sitting.
+                    </p>
+                </div>
+            `,
+
+            choices: ['Begin Experiment']
+        };
+
+        timeline.push(welcome_screen);
+
+        // --------------------------------------------------
+        // FULLSCREEN
+        // --------------------------------------------------
+
+        timeline.push({
+            type: jsPsychFullscreen,
+            fullscreen_mode: true
+        });
+
+        // --------------------------------------------------
+        // INSTRUCTIONS
+        // --------------------------------------------------
+
+        const instructions = {
+
+            type: jsPsychHtmlButtonResponse,
+
+            stimulus: `
+                <div style="width:800px; margin:auto; text-align:left;">
+
+                    <h2 style="text-align:center;">Instructions</h2>
+
+                    <p>
+                        In this experiment, you will see a concept word
+                        paired with a colored square.
+                    </p>
+
+                    <p>
+                        Your task is to indicate how strongly you associate
+                        the color with the concept.
+                    </p>
+
+                    <p>
+                        Use the slider to indicate your response.
+                        The left end represents "Not at all," while the
+                        right end represents "Very much."
+                    </p>
+
+                    <p>
+                        Move your mouse along the slider to adjust your
+                        response. Click on the slider when you are ready
+                        to submit your answer.
+                    </p>
+
+                    <p>
+                        You will complete five blocks, one for each concept.
+                        Each block contains all 71 colors.
+                    </p>
+
+                    <p>
+                        You will be able to take a short break between blocks.
+                    </p>
+
+                    <p>
+                        Click Continue when you are ready to begin.
+                    </p>
+
+                </div>
+            `,
+
+            choices: ['Continue']
+        };
+
+        timeline.push(instructions);
+
+        // --------------------------------------------------
+        // CUSTOM SLIDER TRIAL
+        // --------------------------------------------------
+
+        const association_trial = {
+
+            type: jsPsychHtmlSliderResponse,
+
+            stimulus: function () {
+
+                const concept = jsPsych.timelineVariable('concept');
+
+                const color = jsPsych.timelineVariable('color_hex');
+
+                return `
+
+            <div class="trial-container">
+
+                <div class="concept-word">
+
+                    ${concept}
+
+                </div>
+
+                <div
+
+                    class="color-square"
+
+                    style="background-color:${color};">
+
+                </div>
+
+            </div>
+
+        `;
+
+            },
+
+            min: -200,
+
+            max: 200,
+
+            step: 1,
+
+            slider_start: 0,
+
+            labels: [
+
+                "Not at all",
+
+                "Very much"
+
+            ],
+
+            // We control trial termination ourselves.
+
+            response_ends_trial: false,
+
+            // Hide the default jsPsych button.
+
+            button_label: "",
+
+            on_load: function () {
+
+                const slider = document.querySelector(
+
+                    '#jspsych-html-slider-response-response'
+
+                );
+
+                if (!slider) {
+
+                    console.error("Slider not found!");
+
+                    return;
+
+                }
+
+                // Hide the default jsPsych button.
+
+                const button = document.querySelector('.jspsych-btn');
+
+                if (button) {
+
+                    button.style.display = 'none';
+
+                }
+
+                const buttonContainer = document.querySelector(
+
+                    '.jspsych-html-slider-response-button'
+
+                );
+
+                if (buttonContainer) {
+
+                    buttonContainer.style.display = 'none';
+
+                }
+
+                // Set slider dimensions.
+
+                slider.style.width = '500px';
+
+                slider.style.maxWidth = '85vw';
+
+                slider.style.margin = '0 auto';
+
+                slider.style.display = 'block';
+
+                let locked = false;
+
+                // --------------------------------------------------
+
+                // UPDATE SLIDER BASED ON MOUSE POSITION
+
+                // --------------------------------------------------
+
+                function updateSlider(event) {
+
+                    if (locked) {
+
+                        return;
+
+                    }
+
+                    const rect = slider.getBoundingClientRect();
+
+                    // Get mouse x-position relative to the slider.
+
+                    let x = event.clientX - rect.left;
+
+                    // Constrain mouse position to slider boundaries.
+
+                    x = Math.max(0, Math.min(x, rect.width));
+
+                    // Convert mouse position to slider value.
+
+                    const percent = x / rect.width;
+
+                    const min = Number(slider.min);
+
+                    const max = Number(slider.max);
+
+                    const value = min + percent * (max - min);
+
+                    slider.value = Math.round(value);
+
+                    // Update the visual slider thumb.
+
+                    slider.dispatchEvent(
+
+                        new Event('input', { bubbles: true })
+
+                    );
+
+                }
+
+                // --------------------------------------------------
+
+                // FINISH TRIAL WHEN PARTICIPANT CLICKS ANYWHERE
+
+                // --------------------------------------------------
+
+                function finishTrial(event) {
+
+                    if (locked) {
+
+                        return;
+
+                    }
+
+                    // Update slider to the exact x-position of the click.
+
+                    updateSlider(event);
+
+                    locked = true;
+
+                    // Remove mouse and click listeners.
+
+                    document.removeEventListener('mousemove', updateSlider);
+
+                    document.removeEventListener('click', finishTrial);
+
+                    // Record response and advance to next trial.
+
+                    jsPsych.finishTrial({
+
+                        response: Number(slider.value)
+
+                    });
+
+                }
+
+                // Track mouse movement across the entire document.
+
+                document.addEventListener('mousemove', updateSlider);
+
+                // Any click anywhere on the page submits the response.
+
+                document.addEventListener('click', finishTrial);
+
+            },
+
+            data: {
+
+                concept: jsPsych.timelineVariable('concept'),
+
+                block: jsPsych.timelineVariable('block'),
+
+                block_order: jsPsych.timelineVariable('block_order'),
+
+                v_index: jsPsych.timelineVariable('v_index'),
+
+                color_index: jsPsych.timelineVariable('color_index'),
+
+                color_hex: jsPsych.timelineVariable('color_hex')
+
+            }
+
+        };
+
+        // --------------------------------------------------
+        // BREAK SCREEN
+        // --------------------------------------------------
+
+        function breakScreen(blockNum) {
+
+            return {
+
+                type: jsPsychHtmlButtonResponse,
+
+                stimulus: `
+                    <div class="break-screen">
+
+                        <p>You have completed block ${blockNum} of 5.</p>
+
+                        <p>
+                            Take a short break if you need one.
+                        </p>
+
+                        <p>
+                            Click Continue when you are ready for the next block.
+                        </p>
+
+                    </div>
+                `,
+
+                choices: ['Continue']
+            };
+        }
+
+        // --------------------------------------------------
+        // CREATE RANDOMIZED CONCEPT BLOCKS
+        // --------------------------------------------------
+
+        // Randomize the order of the five concepts.
+        const shuffled_concepts = shuffleArray(assigned_concepts);
+
+        console.log("Randomized concept order:", shuffled_concepts);
+
+        // Create one block per concept.
+        for (let b = 0; b < shuffled_concepts.length; b++) {
+
+            const concept = shuffled_concepts[b];
+
+            // Independently randomize all 71 colors within this block.
+            const shuffled_colors = shuffleArray(colors);
+
+            // Add concept and block information to each color trial.
+            const block_trials = shuffled_colors.map((color) => {
+
+                return {
+
+                    concept: concept,
+
+                    block: b + 1,
+
+                    block_order: b + 1,
+
+                    v_index: color.v_index,
+
+                    color_index: color.color_index,
+
+                    color_hex: color.color_hex
+
+                };
+
+            });
+
+            // Add the trials for this concept block.
+            timeline.push({
+
+                timeline: [association_trial],
+
+                timeline_variables: block_trials,
+
+                randomize_order: false
+
+            });
+
+            // Add a break after blocks 1–4.
+            if (b < shuffled_concepts.length - 1) {
+
+                timeline.push(breakScreen(b + 1));
+
+            }
+
+        }
+
+        // --------------------------------------------------
+        // EXIT FULLSCREEN
+        // --------------------------------------------------
+
+        timeline.push({
+
+            type: jsPsychFullscreen,
+
+            fullscreen_mode: false
+
+        });
+
+        // --------------------------------------------------
+        // SAVE DATA TO ZENODO
+        // --------------------------------------------------
+
+        const save_data = {
+
+            type: jsPsychPipe,
+
+            action: "save",
+
+            experiment_id: experiment_id,
+
+            filename: filename,
+
+            wait_message: "Please wait while your data are being saved.",
+
+            data_string: () => jsPsych.data.get().csv()
+
+        };
+
+        timeline.push(save_data);
+
+        // --------------------------------------------------
+        // DEBRIEF
+        // --------------------------------------------------
+
+        const debrief_screen = {
+
+            type: jsPsychHtmlKeyboardResponse,
+
+            stimulus: `
+                <div style="width:800px; margin:auto;">
+
+                    <h2>Thank you for participating!</h2>
+
+                    <p>
+                        You have completed the experiment.
+                    </p>
+
+                    <p>
+                        The purpose of this study is to investigate
+                        associations between colors and concepts.
+                    </p>
+
+                    <p>
+                        Thank you for your time!
+                    </p>
+
+                    <p>
+                        You may press the ESC key to exit this screen.
+                    </p>
+
+                </div>
+            `,
+
+            choices: ['NO_KEYS']
+
+        };
+
+        timeline.push(debrief_screen);
+
+        // --------------------------------------------------
+        // RUN EXPERIMENT
+        // --------------------------------------------------
+
+        console.log("Timeline:", timeline);
+
+        jsPsych.run(timeline).then(() => {
+
+            if (sona_id) {
+
+                window.location.href =
+                    `https://uwmadison.sona-systems.com/webstudy_credit.aspx?experiment_id=1652&credit_token=ea076512702d447d87e368a354e37fd9&survey_code=${sona_id}`;
+
+            }
+
+        });
+
+    }
+
+    startExperiment();
+
+</script>
+
+</html>
